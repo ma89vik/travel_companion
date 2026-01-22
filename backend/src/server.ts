@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/auth';
 import templatesRoutes from './routes/templates';
 import checklistsRoutes from './routes/checklists';
+import familyRoutes from './routes/family';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/templates', templatesRoutes);
 app.use('/api/checklists', checklistsRoutes);
+app.use('/api/family', familyRoutes);
 
 // Health check
 app.get('/api/health', (req, res) => {

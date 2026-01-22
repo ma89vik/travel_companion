@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { api } from '../services/api';
 import type { ChecklistTemplate, Checklist } from '../types';
 import LanguageToggle from '../components/LanguageToggle';
+import FamilySettings from '../components/FamilySettings';
 import './Dashboard.css';
 
 export default function Dashboard() {
@@ -15,6 +16,7 @@ export default function Dashboard() {
   const [checklists, setChecklists] = useState<Checklist[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState<string | null>(null);
+  const [showFamilySettings, setShowFamilySettings] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -84,6 +86,13 @@ export default function Dashboard() {
             <span className="user-name">
               {language === 'zh' ? `你好，${user?.name}` : `Hello, ${user?.name}`}
             </span>
+            <button 
+              onClick={() => setShowFamilySettings(true)} 
+              className="family-btn"
+              title={language === 'zh' ? '家庭模式' : 'Family Mode'}
+            >
+              👨‍👩‍👧
+            </button>
             <LanguageToggle />
             <button onClick={logout} className="logout-btn">
               {language === 'zh' ? '退出' : 'Sign Out'}
@@ -215,6 +224,10 @@ export default function Dashboard() {
           </section>
         )}
       </main>
+
+      {showFamilySettings && (
+        <FamilySettings onClose={() => setShowFamilySettings(false)} />
+      )}
     </div>
   );
 }

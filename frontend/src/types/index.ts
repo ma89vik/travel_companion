@@ -1,5 +1,18 @@
 export type Language = 'zh' | 'en';
 
+export interface FamilyMember {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface Family {
+  id: string;
+  name: string;
+  code: string;
+  members: FamilyMember[];
+}
+
 export interface User {
   id: string;
   email: string;

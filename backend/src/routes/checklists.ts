@@ -5,17 +5,46 @@ import { authMiddleware, AuthRequest } from '../middleware/auth';
 const router = Router();
 const prisma = new PrismaClient();
 
-// Get all user's checklists
+// Helper to get family member IDs
+async function getFamilyMemberIds(userId: string): Promise<string[]> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      family: {
+        include: {
+          members: {
+            select: { id: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (user?.family) {
+    return user.family.members.map((m) => m.id);
+  }
+  return [userId];
+}
+
+// Get all user's checklists (including family members')
 router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    const memberIds = await getFamilyMemberIds(req.userId!);
+
     const checklists = await prisma.checklist.findMany({
-      where: { userId: req.userId },
+      where: { userId: { in: memberIds } },
       include: {
         template: {
           select: {
             name: true,
             nameEn: true,
             icon: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
           },
         },
         itemStates: true,
@@ -47,13 +76,15 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Get single checklist with items
+// Get single checklist with items (family members can access)
 router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    const memberIds = await getFamilyMemberIds(req.userId!);
+
     const checklist = await prisma.checklist.findFirst({
       where: {
         id: req.params.id,
-        userId: req.userId,
+        userId: { in: memberIds },
       },
       include: {
         template: {
@@ -61,6 +92,12 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
             items: {
               orderBy: { orderIndex: 'asc' },
             },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
           },
         },
         itemStates: true,
@@ -97,6 +134,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       createdAt: checklist.createdAt,
       updatedAt: checklist.updatedAt,
       completedAt: checklist.completedAt,
+      createdBy: checklist.user,
       template: {
         id: checklist.template.id,
         name: checklist.template.name,
@@ -177,7 +215,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Toggle item checked state
+// Toggle item checked state (family members can modify)
 router.patch(
   '/:id/items/:itemId',
   authMiddleware,
@@ -186,11 +224,13 @@ router.patch(
       const { id, itemId } = req.params;
       const { checked } = req.body;
 
-      // Verify checklist belongs to user
+      const memberIds = await getFamilyMemberIds(req.userId!);
+
+      // Verify checklist belongs to user or family member
       const checklist = await prisma.checklist.findFirst({
         where: {
           id,
-          userId: req.userId,
+          userId: { in: memberIds },
         },
       });
 
@@ -242,13 +282,15 @@ router.patch(
   }
 );
 
-// Delete checklist
+// Delete checklist (family members can delete)
 router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
+    const memberIds = await getFamilyMemberIds(req.userId!);
+
     const checklist = await prisma.checklist.findFirst({
       where: {
         id: req.params.id,
-        userId: req.userId,
+        userId: { in: memberIds },
       },
     });
 

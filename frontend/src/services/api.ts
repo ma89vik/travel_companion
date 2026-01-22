@@ -3,6 +3,7 @@ import type {
   User,
   ChecklistTemplate,
   Checklist,
+  Family,
 } from '../types';
 
 const API_URL = 'http://localhost:3001/api';
@@ -115,6 +116,31 @@ class ApiService {
   async deleteChecklist(id: string): Promise<void> {
     await this.request(`/checklists/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // Family
+  async getFamily(): Promise<{ family: Family | null }> {
+    return this.request<{ family: Family | null }>('/family');
+  }
+
+  async createFamily(name?: string): Promise<{ family: Family }> {
+    return this.request<{ family: Family }>('/family/create', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    });
+  }
+
+  async joinFamily(code: string): Promise<{ family: Family }> {
+    return this.request<{ family: Family }>('/family/join', {
+      method: 'POST',
+      body: JSON.stringify({ code }),
+    });
+  }
+
+  async leaveFamily(): Promise<void> {
+    await this.request('/family/leave', {
+      method: 'POST',
     });
   }
 }
