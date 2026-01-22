@@ -79,12 +79,14 @@ model Checklist {
   user        User      @relation(fields: [userId], references: [id])
   
   itemStates  ChecklistItemState[]
+  customItems CustomChecklistItem[]
 }
 
 model ChecklistItemState {
   id        String    @id @default(uuid())
   checked   Boolean   @default(false)
   checkedAt DateTime?
+  deleted   Boolean   @default(false)
   
   checklistId String
   checklist   Checklist    @relation(fields: [checklistId], references: [id], onDelete: Cascade)
@@ -93,4 +95,19 @@ model ChecklistItemState {
   item        TemplateItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
   
   @@unique([checklistId, itemId])
+}
+
+model CustomChecklistItem {
+  id          String    @id @default(uuid())
+  name        String
+  nameEn      String?
+  category    String?
+  categoryEn  String?
+  checked     Boolean   @default(false)
+  checkedAt   DateTime?
+  orderIndex  Int
+  createdAt   DateTime  @default(now())
+  
+  checklistId String
+  checklist   Checklist @relation(fields: [checklistId], references: [id], onDelete: Cascade)
 }

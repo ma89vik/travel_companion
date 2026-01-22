@@ -119,6 +119,19 @@ class ApiService {
     });
   }
 
+  async addItem(checklistId: string, name: string, nameEn?: string): Promise<void> {
+    await this.request(`/checklists/${checklistId}/items`, {
+      method: 'POST',
+      body: JSON.stringify({ name, nameEn }),
+    });
+  }
+
+  async deleteItem(checklistId: string, itemId: string): Promise<void> {
+    await this.request(`/checklists/${checklistId}/items/${itemId}`, {
+      method: 'DELETE',
+    });
+  }
+
   // Family
   async getFamily(): Promise<{ family: Family | null }> {
     return this.request<{ family: Family | null }>('/family');

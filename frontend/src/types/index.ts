@@ -58,7 +58,8 @@ export interface ChecklistItemWithState {
   orderIndex: number;
   checked: boolean;
   checkedAt: string | null;
-  stateId: string | null;
+  stateId?: string | null;
+  isCustom?: boolean;
 }
 
 export interface ChecklistProgress {
