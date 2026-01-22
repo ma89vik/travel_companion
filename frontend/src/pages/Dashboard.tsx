@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { api } from '../services/api';
 import type { ChecklistTemplate, Checklist } from '../types';
+import LanguageToggle from '../components/LanguageToggle';
 import './Dashboard.css';
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
+  const { t, language } = useLanguage();
   const navigate = useNavigate();
   const [templates, setTemplates] = useState<ChecklistTemplate[]>([]);
   const [checklists, setChecklists] = useState<Checklist[]>([]);
@@ -44,7 +47,10 @@ export default function Dashboard() {
   };
 
   const deleteChecklist = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this checklist?')) return;
+    const confirmMsg = language === 'zh' 
+      ? '确定要删除这个清单吗？' 
+      : 'Are you sure you want to delete this checklist?';
+    if (!confirm(confirmMsg)) return;
     
     try {
       await api.deleteChecklist(id);
@@ -58,7 +64,7 @@ export default function Dashboard() {
     return (
       <div className="dashboard-loading">
         <div className="spinner"></div>
-        <p>Loading your travel companion...</p>
+        <p>{language === 'zh' ? '加载中...' : 'Loading your travel companion...'}</p>
       </div>
     );
   }
@@ -72,12 +78,15 @@ export default function Dashboard() {
         <div className="header-content">
           <div className="header-left">
             <span className="header-icon">✈️</span>
-            <h1>Travel Companion</h1>
+            <h1>{language === 'zh' ? '旅行伴侣' : 'Travel Companion'}</h1>
           </div>
           <div className="header-right">
-            <span className="user-name">Hello, {user?.name}</span>
+            <span className="user-name">
+              {language === 'zh' ? `你好，${user?.name}` : `Hello, ${user?.name}`}
+            </span>
+            <LanguageToggle />
             <button onClick={logout} className="logout-btn">
-              Sign Out
+              {language === 'zh' ? '退出' : 'Sign Out'}
             </button>
           </div>
         </div>
@@ -85,8 +94,12 @@ export default function Dashboard() {
 
       <main className="dashboard-main">
         <section className="section">
-          <h2>Start a New Checklist</h2>
-          <p className="section-desc">Choose a template to create a new packing checklist</p>
+          <h2>{language === 'zh' ? '新建清单' : 'Start a New Checklist'}</h2>
+          <p className="section-desc">
+            {language === 'zh' 
+              ? '选择一个模板创建新的打包清单' 
+              : 'Choose a template to create a new packing checklist'}
+          </p>
           
           <div className="templates-grid">
             {templates.map((template) => (
@@ -97,10 +110,10 @@ export default function Dashboard() {
                 disabled={creating === template.id}
               >
                 <span className="template-icon">{template.icon || '📋'}</span>
-                <h3>{template.name}</h3>
-                <p>{template.description}</p>
+                <h3>{t(template.name, template.nameEn)}</h3>
+                <p>{t(template.description, template.descriptionEn)}</p>
                 <span className="template-items">
-                  {template._count?.items || template.items?.length || 0} items
+                  {template._count?.items || template.items?.length || 0} {language === 'zh' ? '项' : 'items'}
                 </span>
                 {creating === template.id && (
                   <div className="template-loading">
@@ -114,8 +127,10 @@ export default function Dashboard() {
 
         {activeChecklists.length > 0 && (
           <section className="section">
-            <h2>Active Checklists</h2>
-            <p className="section-desc">Continue packing for your trips</p>
+            <h2>{language === 'zh' ? '进行中' : 'Active Checklists'}</h2>
+            <p className="section-desc">
+              {language === 'zh' ? '继续整理你的行李' : 'Continue packing for your trips'}
+            </p>
             
             <div className="checklists-grid">
               {activeChecklists.map((checklist) => (
@@ -130,7 +145,7 @@ export default function Dashboard() {
                     <div className="checklist-info">
                       <h3>{checklist.name}</h3>
                       <span className="checklist-template">
-                        {checklist.template.name}
+                        {t(checklist.template.name, checklist.template.nameEn)}
                       </span>
                     </div>
                     <div className="checklist-progress">
@@ -151,7 +166,7 @@ export default function Dashboard() {
                       e.stopPropagation();
                       deleteChecklist(checklist.id);
                     }}
-                    title="Delete checklist"
+                    title={language === 'zh' ? '删除清单' : 'Delete checklist'}
                   >
                     ×
                   </button>
@@ -163,8 +178,10 @@ export default function Dashboard() {
 
         {completedChecklists.length > 0 && (
           <section className="section">
-            <h2>Completed</h2>
-            <p className="section-desc">Past trips you've packed for</p>
+            <h2>{language === 'zh' ? '已完成' : 'Completed'}</h2>
+            <p className="section-desc">
+              {language === 'zh' ? '之前的旅行清单' : 'Past trips you\'ve packed for'}
+            </p>
             
             <div className="checklists-grid completed">
               {completedChecklists.map((checklist) => (
@@ -177,7 +194,8 @@ export default function Dashboard() {
                     <div className="checklist-info">
                       <h3>{checklist.name}</h3>
                       <span className="checklist-template">
-                        Completed {new Date(checklist.completedAt!).toLocaleDateString()}
+                        {language === 'zh' ? '完成于 ' : 'Completed '}
+                        {new Date(checklist.completedAt!).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -187,7 +205,7 @@ export default function Dashboard() {
                       e.stopPropagation();
                       deleteChecklist(checklist.id);
                     }}
-                    title="Delete checklist"
+                    title={language === 'zh' ? '删除清单' : 'Delete checklist'}
                   >
                     ×
                   </button>

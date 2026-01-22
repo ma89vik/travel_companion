@@ -14,6 +14,7 @@ router.get('/', authMiddleware, async (req: AuthRequest, res: Response) => {
         template: {
           select: {
             name: true,
+            nameEn: true,
             icon: true,
           },
         },
@@ -77,7 +78,9 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       return {
         id: item.id,
         name: item.name,
+        nameEn: item.nameEn,
         category: item.category,
+        categoryEn: item.categoryEn,
         orderIndex: item.orderIndex,
         checked: state?.checked || false,
         checkedAt: state?.checkedAt || null,
@@ -97,6 +100,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
       template: {
         id: checklist.template.id,
         name: checklist.template.name,
+        nameEn: checklist.template.nameEn,
         icon: checklist.template.icon,
       },
       items: itemsWithState,
@@ -158,6 +162,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
         template: {
           select: {
             name: true,
+            nameEn: true,
             icon: true,
           },
         },

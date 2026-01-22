@@ -91,9 +91,10 @@
   max-width: 300px;
 }
 
-.header-progress {
+.header-actions {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
 }
 
 .progress-ring {

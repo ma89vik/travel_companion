@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import { useLanguage } from '../context/LanguageContext';
 import type { Checklist, ChecklistItemWithState } from '../types';
+import LanguageToggle from '../components/LanguageToggle';
 import './ChecklistView.css';
 
 export default function ChecklistView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   const [checklist, setChecklist] = useState<Checklist | null>(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState<string | null>(null);
@@ -67,7 +70,7 @@ export default function ChecklistView() {
     return (
       <div className="checklist-loading">
         <div className="spinner"></div>
-        <p>Loading checklist...</p>
+        <p>{language === 'zh' ? '加载清单...' : 'Loading checklist...'}</p>
       </div>
     );
   }
@@ -76,10 +79,10 @@ export default function ChecklistView() {
     return null;
   }
 
-  // Group items by category
+  // Group items by category (using translated category names)
   const itemsByCategory = (checklist.items || []).reduce(
     (acc, item) => {
-      const category = item.category || 'Other';
+      const category = t(item.category, item.categoryEn) || (language === 'zh' ? '其他' : 'Other');
       if (!acc[category]) {
         acc[category] = [];
       }
@@ -90,8 +93,17 @@ export default function ChecklistView() {
   );
 
   const categories = Object.keys(itemsByCategory).sort((a, b) => {
-    if (a === 'Other') return 1;
-    if (b === 'Other') return -1;
+    const importantLabel = language === 'zh' ? '重要' : 'Important';
+    const otherLabel = language === 'zh' ? '其他' : 'Other';
+    
+    // Important always first
+    if (a === importantLabel) return -1;
+    if (b === importantLabel) return 1;
+    
+    // Other always last
+    if (a === otherLabel) return 1;
+    if (b === otherLabel) return -1;
+    
     return a.localeCompare(b);
   });
 
@@ -102,7 +114,7 @@ export default function ChecklistView() {
       <header className="checklist-header">
         <button className="back-btn" onClick={() => navigate('/')}>
           <span>←</span>
-          <span className="back-text">Back</span>
+          <span className="back-text">{language === 'zh' ? '返回' : 'Back'}</span>
         </button>
         
         <div className="header-center">
@@ -110,7 +122,8 @@ export default function ChecklistView() {
           <h1>{checklist.name}</h1>
         </div>
 
-        <div className="header-progress">
+        <div className="header-actions">
+          <LanguageToggle />
           <div className="progress-ring">
             <svg viewBox="0 0 36 36">
               <path
@@ -135,13 +148,21 @@ export default function ChecklistView() {
       {allChecked && (
         <div className="completion-banner">
           <span className="completion-icon">🎉</span>
-          <span>All packed! You're ready for your trip!</span>
+          <span>
+            {language === 'zh' 
+              ? '全部打包完成！准备出发！' 
+              : "All packed! You're ready for your trip!"}
+          </span>
         </div>
       )}
 
       <main className="checklist-main">
         <div className="progress-summary">
-          <span>{checklist.progress.checked} of {checklist.progress.total} items packed</span>
+          <span>
+            {language === 'zh'
+              ? `已打包 ${checklist.progress.checked} / ${checklist.progress.total} 项`
+              : `${checklist.progress.checked} of ${checklist.progress.total} items packed`}
+          </span>
         </div>
 
         {categories.map((category) => (
@@ -169,7 +190,7 @@ export default function ChecklistView() {
                       </svg>
                     )}
                   </span>
-                  <span className="item-name">{item.name}</span>
+                  <span className="item-name">{t(item.name, item.nameEn)}</span>
                   {toggling === item.id && (
                     <span className="item-loading">
                       <div className="spinner tiny"></div>
