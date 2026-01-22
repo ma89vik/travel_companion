@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  name         String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  
+  templates    ChecklistTemplate[]
+  checklists   Checklist[]
+}
+
+model ChecklistTemplate {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  icon        String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  items       TemplateItem[]
+  checklists  Checklist[]
+}
+
+model TemplateItem {
+  id         String   @id @default(uuid())
+  name       String
+  category   String?
+  orderIndex Int
+  createdAt  DateTime @default(now())
+  
+  templateId String
+  template   ChecklistTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+  
+  itemStates ChecklistItemState[]
+}
+
+model Checklist {
+  id          String    @id @default(uuid())
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  completedAt DateTime?
+  
+  templateId  String
+  template    ChecklistTemplate @relation(fields: [templateId], references: [id])
+  
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  
+  itemStates  ChecklistItemState[]
+}
+
+model ChecklistItemState {
+  id        String    @id @default(uuid())
+  checked   Boolean   @default(false)
+  checkedAt DateTime?
+  
+  checklistId String
+  checklist   Checklist    @relation(fields: [checklistId], references: [id], onDelete: Cascade)
+  
+  itemId      String
+  item        TemplateItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  
+  @@unique([checklistId, itemId])
+}
