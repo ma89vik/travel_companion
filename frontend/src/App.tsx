@@ -84,7 +84,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/travel">
       <LanguageProvider>
         <AuthProvider>
           <AppRoutes />
