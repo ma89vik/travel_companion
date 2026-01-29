@@ -247,7 +247,7 @@ router.post('/', authMiddleware, async (req: AuthRequest, res: Response) => {
 // Add custom item to checklist
 router.post('/:id/items', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const { id } = req.params as { id: string };
     const { name, nameEn, category, categoryEn } = req.body;
 
     if (!name) {
@@ -311,7 +311,7 @@ router.patch(
   authMiddleware,
   async (req: AuthRequest, res: Response) => {
     try {
-      const { id, itemId } = req.params;
+      const { id, itemId } = req.params as { id: string; itemId: string };
       const { checked } = req.body;
 
       const memberIds = await getFamilyMemberIds(req.userId!);
@@ -402,7 +402,7 @@ router.delete(
   authMiddleware,
   async (req: AuthRequest, res: Response) => {
     try {
-      const { id, itemId } = req.params;
+      const { id, itemId } = req.params as { id: string; itemId: string };
 
       const memberIds = await getFamilyMemberIds(req.userId!);
 
