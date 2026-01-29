@@ -38,7 +38,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const template = await prisma.checklistTemplate.findFirst({
       where: {
-        id: req.params.id,
+        id: req.params.id as string,
         OR: [
           { isDefault: true },
           { userId: req.userId },

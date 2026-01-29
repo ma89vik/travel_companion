@@ -92,7 +92,7 @@ router.get('/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
 
     const checklist = await prisma.checklist.findFirst({
       where: {
-        id: req.params.id,
+        id: req.params.id as string,
         userId: { in: memberIds },
       },
       include: {
@@ -468,7 +468,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
 
     const checklist = await prisma.checklist.findFirst({
       where: {
-        id: req.params.id,
+        id: req.params.id as string,
         userId: { in: memberIds },
       },
     });
@@ -479,7 +479,7 @@ router.delete('/:id', authMiddleware, async (req: AuthRequest, res: Response) =>
     }
 
     await prisma.checklist.delete({
-      where: { id: req.params.id },
+      where: { id: req.params.id as string },
     });
 
     res.status(204).send();
